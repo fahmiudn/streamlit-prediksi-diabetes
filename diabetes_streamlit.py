@@ -89,11 +89,13 @@ elif page == "Dashboard Visualisasi":
     plt.xticks(rotation=90)
     st.pyplot(fig)
 
-    # Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes
+    # Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes (Pie Chart)
     st.subheader("Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes")
-    fig, ax = plt.subplots()
-    sns.countplot(data=df, x='diagnosis', ax=ax)
-    st.pyplot(fig)
+    plt.figure(figsize=(6, 6))
+    df['diagnosis'].value_counts().plot.pie(autopct='%1.1f%%', colors=['red', 'green'], startangle=90, explode=[0.1, 0])
+    plt.title('Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes')
+    plt.ylabel('')
+    st.pyplot(plt.gcf())
 
     # Heatmap Korelasi Antar Variabel Numerik
     st.subheader("Heatmap Korelasi Antar Variabel Numerik")
