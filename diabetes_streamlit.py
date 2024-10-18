@@ -11,6 +11,7 @@ from imblearn.over_sampling import SMOTE
 import numpy as np
 import tensorflow as tf
 from sklearn.metrics import classification_report, confusion_matrix, mean_squared_error, mean_absolute_error
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 from math import sqrt
 from streamlit_folium import folium_static
 
@@ -130,76 +131,82 @@ def halaman_dashboard():
 # Fungsi untuk menampilkan halaman pelatihan model
 def halaman_latih_model():
     st.header("Pelatihan Model LSTM")
+    # Define features (X) and target (y)
+    X = df.drop(['diagnosis'], axis=1)
+    y = df['diagnosis']
+    
+    # Apply SMOTE
+    smote = SMOTE(random_state=42)
+    X_smote, y_smote = smote.fit_resample(X, y)
+    
+    # Split into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X_smote, y_smote, test_size=0.2, random_state=42)
+    
+    # Scale the data using MinMaxScaler
+    scaler = MinMaxScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    # Reshape data for LSTM
+    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+    
+    # Build the LSTM model
+    neurons = 64
+    epochs = 50
+    batch_size = 128
+    learning_rate = 0.001
 
-    # Tombol untuk memulai pelatihan model
-    if st.button("Latih Model"):
-        # Menghapus kolom yang tidak diperlukan
-        df_model = df.drop(['puskesmas', 'kelurahan', 'longitude', 'latitude'], axis=1)
+    st.write(f"Jumlah Neuron: {neurons}")
+    st.write(f"Jumlah Epoch: {epochs}")
+    st.write(f"Batch Size: {batch_size}")
+    st.write(f"Learning Rate: {learning_rate}")
 
-        # Menentukan fitur (X) dan target (y)
-        X = df_model.drop(['diagnosis'], axis=1)
-        y = df_model['diagnosis']
-
-        # Menerapkan SMOTE
-        smote = SMOTE(random_state=42)
-        X_smote, y_smote = smote.fit_resample(X, y)
-
-        # Memisahkan data menjadi training dan test set
-        X_train, X_test, y_train, y_test = train_test_split(X_smote, y_smote, test_size=0.2, random_state=42)
-
-        # Melakukan scaling pada data menggunakan MinMaxScaler
-        scaler = MinMaxScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
-
-        # Mengubah bentuk data untuk LSTM
-        X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-
-        # Membangun model LSTM
+    # Tambahkan tombol untuk melatih model
+    if st.button('Latih Model'):
+        # Membangun Model LSTM
         model = Sequential()
-        model.add(LSTM(units=50, input_shape=(X_train.shape[1], X_train.shape[2])))
-        model.add(Dense(units=1, activation='sigmoid'))
+        model.add(LSTM(neurons, activation='relu', input_shape=(X_train.shape[1], 1), return_sequences=True))
+        model.add(Dropout(0.2))
+        model.add(LSTM(neurons, activation='relu', return_sequences=False))
+        model.add(Dropout(0.2))
+        model.add(Dense(3, activation='softmax'))
 
-        # Mengompilasi model
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        # Compile Model
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                      loss='categorical_crossentropy', metrics=['accuracy'])
 
-        # Melatih model
-        history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
+        # Latih model
+        history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_test, y_test))
 
-        # Evaluasi model
+        # Simpan model ke dalam session state setelah dilatih
+        st.session_state['model'] = model
+    
+        # Evaluate the model
         test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
-        st.write(f"Test Accuracy: {test_accuracy:.2f}")
-
+        print(f"Test Accuracy: {test_accuracy}")
+        
         # Setelah model dilatih, kita lakukan prediksi pada test set
         y_pred_prob = model.predict(X_test)
-
+        
         # Konversi prediksi probabilitas menjadi nilai kelas biner (0 atau 1)
         y_pred = (y_pred_prob > 0.5).astype("int32")
-
+        
         # Hitung MAE, RMSE, dan MAPE berdasarkan probabilitas prediksi
         mae = mean_absolute_error(y_test, y_pred_prob)
         rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
-
-        # Menampilkan hasil evaluasi
-        st.write(f"Mean Absolute Error (MAE): {mae:.2f}")
-        st.write(f"Root Mean Squared Error (RMSE): {rmse:.2f}")
-
+        
+        # Print hasil evaluasi
+        print(f"Mean Absolute Error (MAE): {mae}")
+        print(f"Root Mean Squared Error (RMSE): {rmse}")
+        
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+        
         # Menghitung metrik klasifikasi
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred)
         recall = recall_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred)
-
-        # Menampilkan hasil
-        st.write(f"Accuracy: {accuracy:.2f}")
-        st.write(f"Precision: {precision:.2f}")
-        st.write(f"Recall: {recall:.2f}")
-        st.write(f"F1 Score: {f1:.2f}")
-
-        # Optional: Tampilkan laporan klasifikasi
-        st.text("\nClassification Report:")
-        st.text(classification_report(y_test, y_pred))
 
 # Fungsi untuk menampilkan halaman prediksi
 def halaman_prediksi():
