@@ -169,13 +169,43 @@ elif page == "Pelatihan Model":
                   batch_size=batch_size, 
                   validation_split=0.2, verbose=1)
 
-        # Evaluate model
-        test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
-        st.write(f"Test Accuracy: {test_accuracy}")
-
         # Save model and scaler in session state
         st.session_state['model'] = model
-        st.success("Model dan scaler telah disimpan dalam session state.")
+
+        # Evaluate the model
+        test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
+        print(f"Test Accuracy: {test_accuracy}")
+        
+        # Setelah model dilatih, kita lakukan prediksi pada test set
+        y_pred_prob = model.predict(X_test)
+        
+        # Konversi prediksi probabilitas menjadi nilai kelas biner (0 atau 1)
+        y_pred = (y_pred_prob > 0.5).astype("int32")
+        
+        # Hitung MAE, RMSE, dan MAPE berdasarkan probabilitas prediksi
+        mae = mean_absolute_error(y_test, y_pred_prob)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
+        
+        # Print hasil evaluasi
+        print(f"Mean Absolute Error (MAE): {mae}")
+        print(f"Root Mean Squared Error (RMSE): {rmse}")
+        
+        # Menghitung metrik klasifikasi
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        
+        # Menampilkan hasil
+        print(f"Accuracy: {accuracy}")
+        print(f"Precision: {precision}")
+        print(f"Recall: {recall}")
+        print(f"F1 Score: {f1}")
+        
+        # Optional: Tampilkan laporan klasifikasi
+        print("\nClassification Report:")
+        print(classification_report(y_test, y_pred))
+
 
 # 4. Halaman Input Data Baru untuk Prediksi
 elif page == "Input Data Baru untuk Prediksi":
