@@ -14,6 +14,8 @@ from sklearn.metrics import classification_report, confusion_matrix, mean_square
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 from math import sqrt
 from streamlit_folium import folium_static
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 
 # Buat tampilan web menggunakan Streamlit
 st.title('Aplikasi Prediksi Diabetes')
@@ -170,7 +172,7 @@ def halaman_latih_model():
         model.add(Dropout(0.2))
         model.add(LSTM(neurons, activation='relu', return_sequences=False))
         model.add(Dropout(0.2))
-        model.add(Dense(3, activation='softmax'))
+        model.add(Dense(1, activation='sigmoid'))
 
         # Compile Model
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
