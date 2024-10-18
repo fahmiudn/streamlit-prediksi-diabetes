@@ -42,11 +42,7 @@ def halaman_awal():
         Fitur-fitur dalam dataset ini meliputi umur, tekanan darah, BMI, dan beberapa indikator kesehatan lainnya.
         """
     )
-    st.header("Akurasi Model")
-    st.write("Akurasi Model: **97.25%**")
-    st.write("Precision: **100%**")
-    st.write("Recall: **94.31%**")
-    st.write("F1 Score: **97.07%**")
+    st.write(df)
 
 # Fungsi untuk menampilkan halaman dashboard visualisasi
 def halaman_dashboard():
