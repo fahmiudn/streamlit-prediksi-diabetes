@@ -1,13 +1,6 @@
+streamlit
 pandas
 numpy
-seaborn
-matplotlib
 scikit-learn
-imbalanced-learn
+imblearn
 tensorflow
-streamlit
-folium
-streamlit-folium
-joblib
-pip
-keras
