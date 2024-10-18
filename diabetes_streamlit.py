@@ -141,6 +141,9 @@ elif page == "Pelatihan Model":
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
     
+    # Simpan scaler ke dalam session state
+    st.session_state['scaler'] = scaler
+    
     # Reshape data for LSTM
     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
