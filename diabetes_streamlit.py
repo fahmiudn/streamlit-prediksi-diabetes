@@ -1,49 +1,68 @@
 import streamlit as st
 import pandas as pd
-import folium
-import tensorflow as tf
-from streamlit_folium import folium_static
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
+
+import folium
 from folium.plugins import MarkerCluster
-from imblearn.over_sampling import SMOTE
-from sklearn.model_selection import train_test_split
+from streamlit_folium import st_folium
+from streamlit_folium import folium_static
+
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import SMOTE
+from sklearn.metrics import confusion_matrix, mean_absolute_error, mean_squared_error, accuracy_score, precision_score, recall_score, f1_score
+from math import sqrt
+
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
-from sklearn.metrics import mean_absolute_error, mean_squared_error, accuracy_score, precision_score, recall_score, f1_score, classification_report
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 
-warnings.filterwarnings("ignore", category=FutureWarning)
+# Buat tampilan web menggunakan Streamlit
+st.title('Aplikasi Prediksi Diabetes')
 
-# Load dataset once for all pages
+# Load dataset langsung di dalam kode
 @st.cache_data
 def load_data():
     return pd.read_csv('diabetes_skripsi.csv')
 
 df = load_data()
 
-# Define sidebar for navigation
-st.sidebar.title("Diabetes Prediction Web App")
-page = st.sidebar.selectbox(
-    "Pilih Halaman:",
-    ["Informasi Dataset", "Dashboard Visualisasi", "Pelatihan Model", "Input Data Baru untuk Prediksi"]
-)
+# Buat sidebar untuk navigasi
+st.sidebar.title("Navigasi")
+page = st.sidebar.radio("Pilih Halaman:", ("Informasi Dataset", "Visualisasi", "Model LSTM", "Input Data Baru"))
 
-# 1. Halaman Informasi Dataset
+# Fungsi untuk menampilkan halaman awal
 if page == "Informasi Dataset":
-    st.title("Informasi Dataset")
-    st.write("Deskripsi dataset dan kolom yang tersedia.")
-    st.write(df.head())
-    st.write("Statistik deskriptif:")
-    st.write(df.describe())
+    st.header("Pengertian Diabetes")
+    st.write(
+        """
+        Diabetes adalah penyakit kronis yang terjadi ketika tubuh tidak dapat memproduksi cukup insulin atau tidak dapat menggunakan insulin secara efektif.
+        Insulin adalah hormon yang mengatur kadar glukosa dalam darah.
+        """
+    )
+    st.header("Informasi Umum Dataset")
+    st.write(
+        """
+        Dataset ini berisi informasi tentang pasien yang memiliki risiko diabetes.
+        Fitur-fitur dalam dataset ini meliputi umur, tekanan darah, BMI, dan beberapa indikator kesehatan lainnya.
+        """
+    )
+    st.header("Akurasi Model")
+    st.write("Akurasi Model: **97.25%**")
+    st.write("Precision: **100%**")
+    st.write("Recall: **94.31%**")
+    st.write("F1 Score: **97.07%**")
 
-# 2. Halaman Dashboard Visualisasi
-elif page == "Dashboard Visualisasi":
-    st.title("Dashboard Visualisasi")
+# Fungsi untuk menampilkan halaman dashboard visualisasi
+elif page == "Visualisasi":
+    st.header("Dashboard Visualisasi")
 
-    # Map with Folium Marker Cluster
+    # Load dataset
+    df = pd.read_csv("diabetes_skripsi.csv")  # Ganti dengan path dataset Anda
+
+    # 1. PEMETAAN MENGGUNAKAN FOLIUM
     st.subheader("Pemetaan Kasus Diabetes di Kota Bogor")
 
     # Create a map centered on Kota Bogor
@@ -62,7 +81,10 @@ elif page == "Dashboard Visualisasi":
             diagnosis = row['diagnosis']
 
             # Customize marker color based on diagnosis
-            color = 'red' if diagnosis == 1 else 'blue'
+            if diagnosis == 1:
+                color = 'red'
+            else:
+                color = 'blue'
 
             # Create a popup with information
             popup_text = f"<b>Umur:</b> {umur}<br><b>Jenis Kelamin:</b> {jk}<br><b>Diagnosis:</b> {diagnosis}"
@@ -89,18 +111,16 @@ elif page == "Dashboard Visualisasi":
     plt.xlabel('Kelurahan')
     plt.ylabel('Jumlah Kasus')
     st.pyplot(plt.gcf())
-    plt.clf()
 
-    # Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes (Pie Chart)
+    # 3. Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes (Pie Chart)
     st.subheader("Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes")
     plt.figure(figsize=(6, 6))
     df['diagnosis'].value_counts().plot.pie(autopct='%1.1f%%', colors=['red', 'green'], startangle=90, explode=[0.1, 0])
     plt.title('Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes')
     plt.ylabel('')
     st.pyplot(plt.gcf())
-    plt.clf()
 
-    # Heatmap Korelasi Antar Variabel Numerik
+    # 4. Heatmap Korelasi
     st.subheader("Heatmap Korelasi Antar Variabel Numerik")
     numerical_columns = df.select_dtypes(include=['float64', 'int64']).columns
     if len(numerical_columns) > 0:
@@ -108,9 +128,8 @@ elif page == "Dashboard Visualisasi":
         sns.heatmap(df[numerical_columns].corr(), annot=True, cmap='coolwarm', vmin=-1, vmax=1)
         plt.title('Heatmap Korelasi Antar Variabel Numerik')
         st.pyplot(plt.gcf())
-        plt.clf()
 
-    # Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin
+    # 5. Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin
     st.subheader("Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin")
     plt.figure(figsize=(6, 4))
     sns.countplot(data=df, x='jk', hue='diagnosis', palette='Set1')
@@ -119,6 +138,176 @@ elif page == "Dashboard Visualisasi":
     plt.ylabel('Jumlah Kasus')
     plt.legend(title='Diagnosis')
     st.pyplot(plt.gcf())
-    plt.clf()
 
-# 3. Halaman Pelatihan Model
+# Latih model LSTM
+elif page == "Model LSTM":
+    st.header('Latih Model LSTM')
+    
+    # Delete columns 'puskesmas', 'kelurahan', 'longitude', and 'latitude'
+    df = df.drop(['puskesmas', 'kelurahan', 'longitude', 'latitude'], axis=1)
+    
+    # Define features (X) and target (y)
+    X = df.drop(['diagnosis'], axis=1)
+    y = df['diagnosis']
+    
+    # Scale the data using MinMaxScaler
+    scaler = MinMaxScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    # Apply SMOTE
+    smote = SMOTE(random_state=42)
+    X_smote, y_smote = smote.fit_resample(X_scaled, y)
+    
+    # Split into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X_smote, 
+                                                    y_smote, 
+                                                    test_size=0.2, 
+                                                    random_state=42)
+    
+    # Reshape data for LSTM
+    X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
+    X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+    
+    
+    # Inisilisasi Hyperparameter
+    neurons = 64
+    epochs = 50
+    batch_size = 128
+    learning_rate = 0.001
+    
+    st.write(f"Jumlah Neuron: {neurons}")
+    st.write(f"Jumlah Epoch: {epochs}")
+    st.write(f"Batch Size: {batch_size}")
+    st.write(f"Learning Rate: {learning_rate}")
+    
+    # Tambahkan tombol untuk melatih model
+    if st.button('Latih Model'):
+        # Membangun Model LSTM
+        model = Sequential()
+        model.add(LSTM(neurons, activation='relu', input_shape=(X_train.shape[1], 1), return_sequences=True))
+        model.add(Dropout(0.2))
+        model.add(LSTM(neurons, activation='relu', return_sequences=False))
+        model.add(Dropout(0.2))
+        model.add(Dense(1, activation='sigmoid'))
+        
+        # Compile Model dengan Optimizer
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+              loss='binary_crossentropy',
+              metrics=['accuracy'])
+        
+        # Latih model
+        history = model.fit(X_train,
+                    y_train,
+                    epochs=epochs,
+                    batch_size=batch_size,
+                    validation_data=(X_test, y_test))
+        
+        # Simpan model ke dalam session state setelah dilatih
+        st.session_state['model'] = model
+        
+        # Plot accuracy dan loss
+        st.subheader('Grafik Akurasi dan Loss')
+        fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+
+        ax[0].plot(history.history['accuracy'], label='Train Accuracy')
+        ax[0].plot(history.history['val_accuracy'], label='Validation Accuracy')
+        ax[0].set_xlabel('Epoch')
+        ax[0].set_ylabel('Accuracy')
+        ax[0].legend()
+        ax[0].set_title('Accuracy')
+
+        ax[1].plot(history.history['loss'], label='Train Loss')
+        ax[1].plot(history.history['val_loss'], label='Validation Loss')
+        ax[1].set_xlabel('Epoch')
+        ax[1].set_ylabel('Loss')
+        ax[1].legend()
+        ax[1].set_title('Loss')
+
+        st.pyplot(fig)
+        
+        # Evaluate the model
+        test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
+        st.write(f"Test Accuracy: {test_accuracy}")
+        
+        # Setelah model dilatih, kita lakukan prediksi pada test set
+        y_pred_prob = model.predict(X_test)
+
+        # Konversi prediksi probabilitas menjadi nilai kelas biner (0 atau 1)
+        y_pred = (y_pred_prob > 0.5).astype("int32")
+
+        # Hitung MAE, RMSE, dan MAPE berdasarkan probabilitas prediksi
+        mae = mean_absolute_error(y_test, y_pred_prob)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
+
+
+        # Print hasil evaluasi
+        st.write(f"Mean Absolute Error (MAE): {mae}")
+        st.write(f"Root Mean Squared Error (RMSE): {rmse}")
+        
+        # Menghitung metrik klasifikasi
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+
+        # Menampilkan hasil
+        st.write(f"Accuracy: {accuracy}")
+        st.write(f"Precision: {precision}")
+        st.write(f"Recall: {recall}")
+        st.write(f"F1 Score: {f1}")
+
+# Fungsi untuk menampilkan halaman prediksi
+elif page == "Input Data Baru":
+    st.header('Input Data Baru untuk Prediksi Diabetes')
+    
+    # Pastikan model sudah dilatih dan disimpan di session state
+    if 'model' not in st.session_state:
+        st.warning("Model belum dilatih. Silakan latih model terlebih dahulu di halaman 'Jalankan Model'.")
+    else:
+        # Input form untuk data baru
+        umur = st.number_input("Umur:", min_value=0, max_value=120, value=0)
+        jk = st.selectbox("Jenis Kelamin", ["Laki-laki", "Perempuan"])
+        merokok = st.selectbox("Merokok", ["Ya", "Tidak"])
+        aktivitas_fisik = st.selectbox("Aktivitas Fisik", ["Ya", "Tidak"])
+        konsumsi_alkohol = st.selectbox("Konsumsi Alkohol", ["Ya", "Tidak"])
+        tekanan_darah = st.number_input("Tekanan Darah:", min_value=0, value=0)
+        bmi = st.number_input("BMI:", min_value=0.0, value=0.0)
+        lingkar_perut = st.number_input("Lingkar Perut (cm)", min_value=0, max_value=200, value=0)
+        pemeriksaan_gula = st.number_input("Hasil Pemeriksaan Gula (mg/dL)", min_value=0, max_value=400, value=0)
+
+        # Konversi input ke format numerik
+        jk = 1 if jk == "Laki-laki" else 0
+        merokok = 1 if merokok == "Ya" else 0
+        aktivitas_fisik = 1 if aktivitas_fisik == "Ya" else 0
+        konsumsi_alkohol = 1 if konsumsi_alkohol == "Ya" else 0
+
+        # Tombol untuk melakukan prediksi
+        if st.button("Prediksi"):
+            # Persiapkan data untuk prediksi
+            new_data = pd.DataFrame({
+                'umur': [umur],
+                'jk': [jk],
+                'merokok': [merokok],
+                'aktivitas_fisik': [aktivitas_fisik],
+                'konsumsi_alkohol': [konsumsi_alkohol],
+                'tekanan_darah': [tekanan_darah],
+                'bmi': [bmi],
+                'lingkar_perut': [lingkar_perut],
+                'pemeriksaan_gula': [pemeriksaan_gula]
+            })
+
+            # Gunakan scaler untuk transformasi data baru
+            scaler = MinMaxScaler()
+            new_data_scaled = scaler.fit_transform(new_data)
+            
+            # Reshape untuk cocok dengan input model
+            new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], new_data_scaled.shape[1], 1))
+
+            # Prediksi menggunakan model
+            model = st.session_state['model']
+            new_prediction_prob = model.predict(new_data_scaled)
+            new_prediction_class = (new_prediction_prob > 0.5).astype("int32")
+
+            # Tampilkan hasil prediksi
+            st.write(f"Probabilitas Diabetes: {new_prediction_prob[0][0]:.2f}")
+            st.write(f"Prediksi Kelas: {'Diabetes' if new_prediction_class[0][0] == 1 else 'Non-Diabetes'}")
