@@ -105,7 +105,6 @@ def halaman_dashboard():
     st.subheader("Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes")
     plt.figure(figsize=(6, 6))
     df['diagnosis'].value_counts().plot.pie(autopct='%1.1f%%', colors=['red', 'green'], startangle=90, explode=[0.1, 0])
-    plt.title('Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes')
     plt.ylabel('')
     st.pyplot(plt.gcf())
 
