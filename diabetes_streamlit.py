@@ -18,7 +18,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, accuracy_sc
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # Load dataset once for all pages
-@st.cache
+@st.cache_data
 def load_data():
     return pd.read_csv('diabetes_skripsi.csv')
 
@@ -62,10 +62,7 @@ elif page == "Dashboard Visualisasi":
             diagnosis = row['diagnosis']
 
             # Customize marker color based on diagnosis
-            if diagnosis == 1:
-                color = 'red'
-            else:
-                color = 'blue'
+            color = 'red' if diagnosis == 1 else 'blue'
 
             # Create a popup with information
             popup_text = f"<b>Umur:</b> {umur}<br><b>Jenis Kelamin:</b> {jk}<br><b>Diagnosis:</b> {diagnosis}"
@@ -92,6 +89,7 @@ elif page == "Dashboard Visualisasi":
     plt.xlabel('Kelurahan')
     plt.ylabel('Jumlah Kasus')
     st.pyplot(plt.gcf())
+    plt.clf()
 
     # Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes (Pie Chart)
     st.subheader("Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes")
@@ -100,6 +98,7 @@ elif page == "Dashboard Visualisasi":
     plt.title('Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes')
     plt.ylabel('')
     st.pyplot(plt.gcf())
+    plt.clf()
 
     # Heatmap Korelasi Antar Variabel Numerik
     st.subheader("Heatmap Korelasi Antar Variabel Numerik")
@@ -109,6 +108,7 @@ elif page == "Dashboard Visualisasi":
         sns.heatmap(df[numerical_columns].corr(), annot=True, cmap='coolwarm', vmin=-1, vmax=1)
         plt.title('Heatmap Korelasi Antar Variabel Numerik')
         st.pyplot(plt.gcf())
+        plt.clf()
 
     # Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin
     st.subheader("Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin")
@@ -119,6 +119,7 @@ elif page == "Dashboard Visualisasi":
     plt.ylabel('Jumlah Kasus')
     plt.legend(title='Diagnosis')
     st.pyplot(plt.gcf())
+    plt.clf()
 
 # 3. Halaman Pelatihan Model
 elif page == "Pelatihan Model":
@@ -143,6 +144,9 @@ elif page == "Pelatihan Model":
     # Reshape data for LSTM
     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+
+    # Simpan scaler di session state
+    st.session_state['scaler'] = scaler
 
     # Tidak ada input parameter dari pengguna, hard-code parameter training
     neurons = 64
@@ -173,7 +177,7 @@ elif page == "Pelatihan Model":
                   batch_size=batch_size, 
                   validation_split=0.2, verbose=1)
 
-        # Save model and scaler in session state
+        # Save model in session state
         st.session_state['model'] = model
 
         # Evaluate the model
@@ -186,14 +190,13 @@ elif page == "Pelatihan Model":
         # Konversi prediksi probabilitas menjadi nilai kelas biner (0 atau 1)
         y_pred = (y_pred_prob > 0.5).astype("int32")
         
-        # Hitung MAE, RMSE, dan MAPE berdasarkan probabilitas prediksi
-        mae = mean_absolute_error(y_test, y_pred_prob)
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
+        # Hitung MAE, RMSE, dan MAPE berdasarkan kelas prediksi
+        mae = mean_absolute_error(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
         
         # Print hasil evaluasi
         st.write(f"Mean Absolute Error (MAE): {mae}")
         st.write(f"Root Mean Squared Error (RMSE): {rmse}")
-
 
 # 4. Halaman Input Data Baru untuk Prediksi
 elif page == "Input Data Baru untuk Prediksi":
@@ -201,51 +204,44 @@ elif page == "Input Data Baru untuk Prediksi":
 
     # Pastikan model sudah dilatih dan disimpan di session state
     if 'model' not in st.session_state:
-        st.warning("Model belum dilatih. Silakan latih model terlebih dahulu di halaman 'Jalankan Model'.")
+        st.warning("Model belum dilatih. Silakan latih model terlebih dahulu di halaman 'Pelatihan Model'.")
     else:
         # Form input data
         umur = st.number_input("Umur:", min_value=0, max_value=120, value=0)
         jk = st.selectbox("Jenis Kelamin", ["Laki-laki", "Perempuan"])
         merokok = st.selectbox("Merokok", ["Ya", "Tidak"])
-        aktivitas_fisik = st.selectbox("Aktivitas Fisik", ["Ya", "Tidak"])
-        konsumsi_alkohol = st.selectbox("Konsumsi Alkohol", ["Ya", "Tidak"])
-        tekanan_darah = st.number_input("Tekanan Darah:", min_value=0, value=0)
-        bmi = st.number_input("BMI:", min_value=0.0, value=0.0)
-        lingkar_perut = st.number_input("Lingkar Perut (cm)", min_value=0, max_value=200, value=0)
-        pemeriksaan_gula = st.number_input("Hasil Pemeriksaan Gula (mg/dL)", min_value=0, max_value=400, value=0)
+        aktivitas_fisik = st.selectbox("Aktivitas Fisik", ["Aktif", "Tidak Aktif"])
+        riwayat_keluarga = st.selectbox("Riwayat Keluarga Diabetes", ["Ya", "Tidak"])
+        
+        # Map input ke dalam fitur sesuai dengan dataset
+        features = {
+            'umur': umur,
+            'jk': 1 if jk == "Laki-laki" else 0,
+            'merokok': 1 if merokok == "Ya" else 0,
+            'aktivitas_fisik': 1 if aktivitas_fisik == "Aktif" else 0,
+            'riwayat_keluarga': 1 if riwayat_keluarga == "Ya" else 0
+        }
 
-        # Konversi input ke format numerik
-        jk = 1 if jk == "Laki-laki" else 0
-        merokok = 1 if merokok == "Ya" else 0
-        aktivitas_fisik = 1 if aktivitas_fisik == "Ya" else 0
-        konsumsi_alkohol = 1 if konsumsi_alkohol == "Ya" else 0
+        # Ubah fitur menjadi DataFrame
+        input_data = pd.DataFrame(features, index=[0])
+        
+        # Lakukan scaling pada input_data
+        scaler = st.session_state.get('scaler')
+        if scaler is not None:
+            input_data_scaled = scaler.transform(input_data)
 
-        # Tombol untuk melakukan prediksi
-        if st.button("Prediksi"):
-            # Preprocessing data input seperti di halaman model
-            new_data = pd.DataFrame({
-                'umur': [umur],
-                'jk': [jk],
-                'merokok': [merokok],
-                'aktivitas_fisik': [aktivitas_fisik],
-                'konsumsi_alkohol': [konsumsi_alkohol],
-                'tekanan_darah': [tekanan_darah],
-                'bmi': [bmi],
-                'lingkar_perut': [lingkar_perut],
-                'pemeriksaan_gula': [pemeriksaan_gula]
-            })
-    
-            # Gunakan scaler untuk transformasi data baru
-            scaler = MinMaxScaler()
-            new_data_scaled = scaler.transform(new_data)
+            # Reshape untuk LSTM
+            input_data_reshaped = input_data_scaled.reshape((input_data_scaled.shape[0], 1, input_data_scaled.shape[1]))
 
-            # Reshape untuk cocok dengan input model
-            new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], 1, new_data_scaled.shape[1]))
-    
-            # Prediksi menggunakan model
-            new_prediction_prob = model.predict(new_data_scaled)
-            new_prediction_class = (new_prediction_prob > 0.5).astype("int32")
-    
+            # Buat prediksi
+            model = st.session_state['model']
+            prediction_prob = model.predict(input_data_reshaped)
+            prediction = (prediction_prob > 0.5).astype("int32")[0][0]
+
             # Tampilkan hasil prediksi
-            st.write(f"Probabilitas Diabetes: {new_prediction_prob[0][0]:.2f}")
-            st.write(f"Prediksi Kelas: {'Diabetes' if new_prediction_class[0][0] == 1 else 'Non-Diabetes'}")
+            if prediction == 1:
+                st.success("Prediksi: Pasien berisiko terkena diabetes.")
+            else:
+                st.success("Prediksi: Pasien tidak berisiko terkena diabetes.")
+        else:
+            st.error("Scaler tidak ditemukan. Pastikan model telah dilatih dan scaler telah disimpan.")
