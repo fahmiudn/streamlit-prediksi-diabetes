@@ -119,13 +119,6 @@ elif page == "Dashboard Visualisasi":
 # 3. Halaman Pelatihan Model
 elif page == "Pelatihan Model":
     st.title("Pelatihan Model LSTM")
-    
-    # Hyperparameters input
-    neuron = st.number_input("Jumlah Neuron", min_value=10, max_value=200, value=50, step=10)
-    epoch = st.number_input("Epoch", min_value=10, max_value=200, value=50, step=10)
-    batch_size = st.number_input("Batch Size", min_value=16, max_value=128, value=32, step=16)
-    optimizer = st.selectbox("Optimizer", ["adam", "sgd", "rmsprop"])
-    learning_rate = st.number_input("Learning Rate", min_value=0.0001, max_value=0.01, value=0.001, step=0.0001)
 
     # Feature and target
     X = df.drop(['diagnosis', 'puskesmas', 'kelurahan', 'longitude', 'latitude'], axis=1)
@@ -147,17 +140,34 @@ elif page == "Pelatihan Model":
     X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
     X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
+    # Tidak ada input parameter dari pengguna, hard-code parameter training
+    neurons = 64
+    epochs = 50
+    batch_size = 128
+    learning_rate = 0.001
+
+    st.write(f"Jumlah Neuron: {neurons}")
+    st.write(f"Jumlah Epoch: {epochs}")
+    st.write(f"Batch Size: {batch_size}")
+    st.write(f"Learning Rate: {learning_rate}")
+    
     if st.button("Latih Model"):
         # Build LSTM model
         model = Sequential()
-        model.add(LSTM(units=neuron, input_shape=(X_train.shape[1], X_train.shape[2])))
+        model.add(LSTM(neurons, input_shape=(X_train.shape[1], X_train.shape[2])))
         model.add(Dense(units=1, activation='sigmoid'))
 
         # Compile model
-        model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', 
+                      optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), 
+                      metrics=['accuracy'])
 
         # Train model
-        model.fit(X_train, y_train, epochs=epoch, batch_size=batch_size, validation_split=0.2, verbose=1)
+        model.fit(X_train, 
+                  y_train, 
+                  epochs=epochs, 
+                  batch_size=batch_size, 
+                  validation_split=0.2, verbose=1)
 
         # Evaluate model
         test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
@@ -165,7 +175,6 @@ elif page == "Pelatihan Model":
 
         # Save model and scaler in session state
         st.session_state['model'] = model
-        st.session_state['scaler'] = scaler
         st.success("Model dan scaler telah disimpan dalam session state.")
 
 # 4. Halaman Input Data Baru untuk Prediksi
@@ -175,7 +184,6 @@ elif page == "Input Data Baru untuk Prediksi":
     # Check if model exists in session state
     if 'model' in st.session_state and 'scaler' in st.session_state:
         model = st.session_state['model']
-        scaler = st.session_state['scaler']
 
         st.write("Masukkan data baru:")
         # Input data baru
@@ -187,6 +195,7 @@ elif page == "Input Data Baru untuk Prediksi":
         new_data_df = pd.DataFrame([new_data])
 
         # Preprocess the new data
+        scaler = MinMaxScaler()
         new_data_scaled = scaler.transform(new_data_df)
         new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], 1, new_data_scaled.shape[1]))
 
