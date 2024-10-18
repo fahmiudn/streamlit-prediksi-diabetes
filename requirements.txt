@@ -6,5 +6,5 @@ matplotlib
 folium
 streamlit-folium
 scikit-learn
-imblearn
+imbalanced-learn
 tensorflow
