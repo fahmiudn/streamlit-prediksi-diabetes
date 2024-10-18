@@ -13,46 +13,16 @@ import tensorflow as tf
 from sklearn.metrics import classification_report, confusion_matrix, mean_squared_error, mean_absolute_error
 from math import sqrt
 from streamlit_folium import folium_static
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
 
-# Load the dataset
-df = pd.read_csv("diabetes_skripsi.csv")  # Ganti dengan path dataset Anda
+# Buat tampilan web menggunakan Streamlit
+st.title('Aplikasi Prediksi Diabetes')
 
-# Prepare the data for LSTM
-# Delete unnecessary columns
-df = df.drop(['puskesmas', 'kelurahan', 'longitude', 'latitude'], axis=1)
+# Load dataset langsung di dalam kode
+@st.cache_data
+def load_data():
+    return pd.read_csv('diabetes_skripsi.csv')
 
-# Define features (X) and target (y)
-X = df.drop(['diagnosis'], axis=1)
-y = df['diagnosis']
-
-# Apply SMOTE
-smote = SMOTE(random_state=42)
-X_smote, y_smote = smote.fit_resample(X, y)
-
-# Split into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X_smote, y_smote, test_size=0.2, random_state=42)
-
-# Scale the data using MinMaxScaler
-scaler = MinMaxScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
-
-# Reshape data for LSTM
-X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
-
-# Build the LSTM model
-model = Sequential()
-model.add(LSTM(units=50, input_shape=(X_train.shape[1], X_train.shape[2])))
-model.add(Dense(units=1, activation='sigmoid'))
-
-# Compile the model
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-# Train the model
-model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=0)
+df = load_data()
 
 # Fungsi untuk menampilkan halaman awal
 def halaman_awal():
@@ -81,6 +51,9 @@ def halaman_awal():
 # Fungsi untuk menampilkan halaman dashboard visualisasi
 def halaman_dashboard():
     st.header("Dashboard Visualisasi")
+
+    # Load dataset
+    df = pd.read_csv("diabetes_skripsi.csv")  # Ganti dengan path dataset Anda
 
     # 1. PEMETAAN MENGGUNAKAN FOLIUM
     st.subheader("Pemetaan Kasus Diabetes di Kota Bogor")
@@ -185,6 +158,7 @@ def halaman_prediksi():
         new_data = np.array([[umur, jk, merokok, aktivitas_fisik, konsumsi_alkohol, tekanan_darah, bmi, lingkar_perut, pemeriksaan_gula]])
 
         # Gunakan scaler untuk transformasi data baru
+        scaler = MinMaxScaler()
         new_data_scaled = scaler.transform(new_data)
         new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], 1, new_data_scaled.shape[1]))
 
