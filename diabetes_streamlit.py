@@ -196,28 +196,41 @@ elif page == "Pelatihan Model":
 elif page == "Input Data Baru untuk Prediksi":
     st.title("Input Data Baru untuk Prediksi Diabetes")
 
-    # Check if model exists in session state
-    if 'model' in st.session_state and 'scaler' in st.session_state:
-        model = st.session_state['model']
-
-        st.write("Masukkan data baru:")
-        # Input data baru
-        new_data = {
-            'usia': st.number_input('Usia', min_value=0, max_value=100),
-            'berat_badan': st.number_input('Berat Badan', min_value=0, max_value=200),
-            # tambahkan input field sesuai kolom pada dataset
-        }
-        new_data_df = pd.DataFrame([new_data])
-
-        # Preprocess the new data
-        scaler = MinMaxScaler()
-        new_data_scaled = scaler.transform(new_data_df)
-        new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], 1, new_data_scaled.shape[1]))
-
-        # Predict the result
-        if st.button("Prediksi"):
-            prediction = model.predict(new_data_scaled)
-            diagnosis = "Diabetes" if prediction > 0.5 else "Non-Diabetes"
-            st.write(f"Hasil prediksi: {diagnosis}")
+    # Pastikan model sudah dilatih dan disimpan di session state
+    if 'model' not in st.session_state:
+        st.warning("Model belum dilatih. Silakan latih model terlebih dahulu di halaman 'Jalankan Model'.")
     else:
-        st.error("Model belum dilatih. Silakan latih model terlebih dahulu di halaman Pelatihan Model.")
+        # Form input data
+        umur = st.number_input("Umur:", min_value=0, max_value=120, value=0)
+        jk = st.selectbox("Jenis Kelamin", ["Laki-laki", "Perempuan"])
+        merokok = st.selectbox("Merokok", ["Ya", "Tidak"])
+        aktivitas_fisik = st.selectbox("Aktivitas Fisik", ["Ya", "Tidak"])
+        konsumsi_alkohol = st.selectbox("Konsumsi Alkohol", ["Ya", "Tidak"])
+        tekanan_darah = st.number_input("Tekanan Darah:", min_value=0, value=0)
+        bmi = st.number_input("BMI:", min_value=0.0, value=0.0)
+        lingkar_perut = st.number_input("Lingkar Perut (cm)", min_value=0, max_value=200, value=0)
+        pemeriksaan_gula = st.number_input("Hasil Pemeriksaan Gula (mg/dL)", min_value=0, max_value=400, value=0)
+
+        # Konversi input ke format numerik
+        jk = 1 if jk == "Laki-laki" else 0
+        merokok = 1 if merokok == "Ya" else 0
+        aktivitas_fisik = 1 if aktivitas_fisik == "Ya" else 0
+        konsumsi_alkohol = 1 if konsumsi_alkohol == "Ya" else 0
+
+        # Tombol untuk melakukan prediksi
+        if st.button("Prediksi"):
+            # Persiapkan data untuk prediksi
+            new_data = np.array([[umur, jk, merokok, aktivitas_fisik, konsumsi_alkohol, tekanan_darah, bmi, lingkar_perut, pemeriksaan_gula]])
+    
+            # Gunakan scaler untuk transformasi data baru
+            scaler = MinMaxScaler()
+            new_data_scaled = scaler.transform(new_data)
+            new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], 1, new_data_scaled.shape[1]))
+    
+            # Prediksi menggunakan model
+            new_prediction_prob = model.predict(new_data_scaled)
+            new_prediction_class = (new_prediction_prob > 0.5).astype("int32")
+    
+            # Tampilkan hasil prediksi
+            st.write(f"Probabilitas Diabetes: {new_prediction_prob[0][0]:.2f}")
+            st.write(f"Prediksi Kelas: {'Diabetes' if new_prediction_class[0][0] == 1 else 'Non-Diabetes'}")
