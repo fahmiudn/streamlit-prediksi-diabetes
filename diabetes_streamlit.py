@@ -83,12 +83,15 @@ elif page == "Dashboard Visualisasi":
     # Display the map
     folium_static(map_bogor)
 
-    # Distribusi Diagnosa Diabetes di Setiap Kelurahan
+    # 2. Distribusi Diagnosa Diabetes di Setiap Kelurahan
     st.subheader("Distribusi Diagnosa Diabetes di Setiap Kelurahan")
-    fig, ax = plt.subplots()
-    sns.countplot(data=df, x='kelurahan', hue='diagnosis', ax=ax)
+    plt.figure(figsize=(12, 6))
+    sns.countplot(data=df, x='kelurahan', hue='diagnosis', palette='Set1')
     plt.xticks(rotation=90)
-    st.pyplot(fig)
+    plt.title('Distribusi Diagnosa Diabetes di Setiap Kelurahan')
+    plt.xlabel('Kelurahan')
+    plt.ylabel('Jumlah Kasus')
+    st.pyplot(plt.gcf())
 
     # Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes (Pie Chart)
     st.subheader("Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes")
@@ -219,12 +222,24 @@ elif page == "Input Data Baru untuk Prediksi":
 
         # Tombol untuk melakukan prediksi
         if st.button("Prediksi"):
-            # Persiapkan data untuk prediksi
-            new_data = np.array([[umur, jk, merokok, aktivitas_fisik, konsumsi_alkohol, tekanan_darah, bmi, lingkar_perut, pemeriksaan_gula]])
+            # Preprocessing data input seperti di halaman model
+            new_data = pd.DataFrame({
+                'umur': [umur],
+                'jk': [jk],
+                'merokok': [merokok],
+                'aktivitas_fisik': [aktivitas_fisik],
+                'konsumsi_alkohol': [konsumsi_alkohol],
+                'tekanan_darah': [tekanan_darah],
+                'bmi': [bmi],
+                'lingkar_perut': [lingkar_perut],
+                'pemeriksaan_gula': [pemeriksaan_gula]
+            })
     
             # Gunakan scaler untuk transformasi data baru
             scaler = MinMaxScaler()
             new_data_scaled = scaler.transform(new_data)
+
+            # Reshape untuk cocok dengan input model
             new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], 1, new_data_scaled.shape[1]))
     
             # Prediksi menggunakan model
