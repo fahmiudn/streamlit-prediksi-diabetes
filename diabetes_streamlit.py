@@ -190,22 +190,6 @@ elif page == "Pelatihan Model":
         # Print hasil evaluasi
         st.write(f"Mean Absolute Error (MAE): {mae}")
         st.write(f"Root Mean Squared Error (RMSE): {rmse}")
-        
-        # Menghitung metrik klasifikasi
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
-        
-        # Menampilkan hasil
-        st.write(f"Accuracy: {accuracy}")
-        st.write(f"Precision: {precision}")
-        st.write(f"Recall: {recall}")
-        st.write(f"F1 Score: {f1}")
-        
-        # Optional: Tampilkan laporan klasifikasi
-        st.write("\nClassification Report:")
-        st.write(classification_report(y_test, y_pred))
 
 
 # 4. Halaman Input Data Baru untuk Prediksi
