@@ -5,7 +5,7 @@ from streamlit_folium import folium_static
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
+from folium.plugins import MarkerCluster
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
