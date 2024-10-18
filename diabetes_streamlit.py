@@ -107,7 +107,7 @@ elif page == "Dashboard Visualisasi":
     # Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin
     st.subheader("Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin")
     fig, ax = plt.subplots()
-    sns.countplot(data=df, x='jenis_kelamin', hue='diagnosis', ax=ax)
+    sns.countplot(data=df, x='jk', hue='diagnosis', ax=ax)
     st.pyplot(fig)
 
 # 3. Halaman Pelatihan Model
