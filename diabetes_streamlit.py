@@ -131,73 +131,75 @@ def halaman_dashboard():
 def halaman_latih_model():
     st.header("Pelatihan Model LSTM")
 
-    # Menghapus kolom yang tidak diperlukan
-    df_model = df.drop(['puskesmas', 'kelurahan', 'longitude', 'latitude'], axis=1)
+    # Tombol untuk memulai pelatihan model
+    if st.button("Latih Model"):
+        # Menghapus kolom yang tidak diperlukan
+        df_model = df.drop(['puskesmas', 'kelurahan', 'longitude', 'latitude'], axis=1)
 
-    # Menentukan fitur (X) dan target (y)
-    X = df_model.drop(['diagnosis'], axis=1)
-    y = df_model['diagnosis']
+        # Menentukan fitur (X) dan target (y)
+        X = df_model.drop(['diagnosis'], axis=1)
+        y = df_model['diagnosis']
 
-    # Menerapkan SMOTE
-    smote = SMOTE(random_state=42)
-    X_smote, y_smote = smote.fit_resample(X, y)
+        # Menerapkan SMOTE
+        smote = SMOTE(random_state=42)
+        X_smote, y_smote = smote.fit_resample(X, y)
 
-    # Memisahkan data menjadi training dan test set
-    X_train, X_test, y_train, y_test = train_test_split(X_smote, y_smote, test_size=0.2, random_state=42)
+        # Memisahkan data menjadi training dan test set
+        X_train, X_test, y_train, y_test = train_test_split(X_smote, y_smote, test_size=0.2, random_state=42)
 
-    # Melakukan scaling pada data menggunakan MinMaxScaler
-    scaler = MinMaxScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+        # Melakukan scaling pada data menggunakan MinMaxScaler
+        scaler = MinMaxScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
 
-    # Mengubah bentuk data untuk LSTM
-    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
-    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+        # Mengubah bentuk data untuk LSTM
+        X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
-    # Membangun model LSTM
-    model = Sequential()
-    model.add(LSTM(units=50, input_shape=(X_train.shape[1], X_train.shape[2])))
-    model.add(Dense(units=1, activation='sigmoid'))
+        # Membangun model LSTM
+        model = Sequential()
+        model.add(LSTM(units=50, input_shape=(X_train.shape[1], X_train.shape[2])))
+        model.add(Dense(units=1, activation='sigmoid'))
 
-    # Mengompilasi model
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        # Mengompilasi model
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    # Melatih model
-    history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
+        # Melatih model
+        history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
 
-    # Evaluasi model
-    test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
-    st.write(f"Test Accuracy: {test_accuracy:.2f}")
+        # Evaluasi model
+        test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
+        st.write(f"Test Accuracy: {test_accuracy:.2f}")
 
-    # Setelah model dilatih, kita lakukan prediksi pada test set
-    y_pred_prob = model.predict(X_test)
+        # Setelah model dilatih, kita lakukan prediksi pada test set
+        y_pred_prob = model.predict(X_test)
 
-    # Konversi prediksi probabilitas menjadi nilai kelas biner (0 atau 1)
-    y_pred = (y_pred_prob > 0.5).astype("int32")
+        # Konversi prediksi probabilitas menjadi nilai kelas biner (0 atau 1)
+        y_pred = (y_pred_prob > 0.5).astype("int32")
 
-    # Hitung MAE, RMSE, dan MAPE berdasarkan probabilitas prediksi
-    mae = mean_absolute_error(y_test, y_pred_prob)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
+        # Hitung MAE, RMSE, dan MAPE berdasarkan probabilitas prediksi
+        mae = mean_absolute_error(y_test, y_pred_prob)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
 
-    # Menampilkan hasil evaluasi
-    st.write(f"Mean Absolute Error (MAE): {mae:.2f}")
-    st.write(f"Root Mean Squared Error (RMSE): {rmse:.2f}")
+        # Menampilkan hasil evaluasi
+        st.write(f"Mean Absolute Error (MAE): {mae:.2f}")
+        st.write(f"Root Mean Squared Error (RMSE): {rmse:.2f}")
 
-    # Menghitung metrik klasifikasi
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
+        # Menghitung metrik klasifikasi
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
 
-    # Menampilkan hasil
-    st.write(f"Accuracy: {accuracy:.2f}")
-    st.write(f"Precision: {precision:.2f}")
-    st.write(f"Recall: {recall:.2f}")
-    st.write(f"F1 Score: {f1:.2f}")
+        # Menampilkan hasil
+        st.write(f"Accuracy: {accuracy:.2f}")
+        st.write(f"Precision: {precision:.2f}")
+        st.write(f"Recall: {recall:.2f}")
+        st.write(f"F1 Score: {f1:.2f}")
 
-    # Optional: Tampilkan laporan klasifikasi
-    st.text("\nClassification Report:")
-    st.text(classification_report(y_test, y_pred))
+        # Optional: Tampilkan laporan klasifikasi
+        st.text("\nClassification Report:")
+        st.text(classification_report(y_test, y_pred))
 
 # Fungsi untuk menampilkan halaman prediksi
 def halaman_prediksi():
