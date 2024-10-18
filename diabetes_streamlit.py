@@ -276,7 +276,7 @@ elif page == "Input Data Baru":
         pemeriksaan_gula = st.number_input("Hasil Pemeriksaan Gula (mg/dL)", min_value=0, max_value=400, value=0)
 
         # Konversi input ke format numerik
-        jk = 1 if jk == "Laki-laki" else 0
+        jk = 0 if jk == "Laki-laki" else 0
         merokok = 1 if merokok == "Ya" else 0
         aktivitas_fisik = 1 if aktivitas_fisik == "Ya" else 0
         konsumsi_alkohol = 1 if konsumsi_alkohol == "Ya" else 0
