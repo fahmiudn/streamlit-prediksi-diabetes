@@ -175,7 +175,7 @@ elif page == "Pelatihan Model":
 
         # Evaluate the model
         test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
-        print(f"Test Accuracy: {test_accuracy}")
+        st.write(f"Test Accuracy: {test_accuracy}")
         
         # Setelah model dilatih, kita lakukan prediksi pada test set
         y_pred_prob = model.predict(X_test)
@@ -188,8 +188,8 @@ elif page == "Pelatihan Model":
         rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
         
         # Print hasil evaluasi
-        print(f"Mean Absolute Error (MAE): {mae}")
-        print(f"Root Mean Squared Error (RMSE): {rmse}")
+        st.write(f"Mean Absolute Error (MAE): {mae}")
+        st.write(f"Root Mean Squared Error (RMSE): {rmse}")
         
         # Menghitung metrik klasifikasi
         accuracy = accuracy_score(y_test, y_pred)
@@ -198,14 +198,14 @@ elif page == "Pelatihan Model":
         f1 = f1_score(y_test, y_pred)
         
         # Menampilkan hasil
-        print(f"Accuracy: {accuracy}")
-        print(f"Precision: {precision}")
-        print(f"Recall: {recall}")
-        print(f"F1 Score: {f1}")
+        st.write(f"Accuracy: {accuracy}")
+        st.write(f"Precision: {precision}")
+        st.write(f"Recall: {recall}")
+        st.write(f"F1 Score: {f1}")
         
         # Optional: Tampilkan laporan klasifikasi
-        print("\nClassification Report:")
-        print(classification_report(y_test, y_pred))
+        st.write("\nClassification Report:")
+        st.write(classification_report(y_test, y_pred))
 
 
 # 4. Halaman Input Data Baru untuk Prediksi
