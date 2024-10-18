@@ -42,13 +42,44 @@ elif page == "Dashboard Visualisasi":
     st.title("Dashboard Visualisasi")
 
     # Map with Folium Marker Cluster
-    st.subheader("Map Folium Marker Cluster")
-    map_data = df[['latitude', 'longitude']].dropna()
-    map_center = [map_data['latitude'].mean(), map_data['longitude'].mean()]
-    m = folium.Map(location=map_center, zoom_start=10)
-    for idx, row in map_data.iterrows():
-        folium.Marker([row['latitude'], row['longitude']]).add_to(m)
-    folium_static(m)
+    st.subheader("Pemetaan Kasus Diabetes di Kota Bogor")
+
+    # Create a map centered on Kota Bogor
+    map_bogor = folium.Map(location=[-6.595038, 106.816635], zoom_start=12)
+
+    # Create a MarkerCluster object
+    marker_cluster = MarkerCluster().add_to(map_bogor)
+
+    # Iterate through the DataFrame and add markers to the cluster
+    for index, row in df.iterrows():
+        try:
+            latitude = float(row['latitude'])
+            longitude = float(row['longitude'])
+            umur = row['umur']
+            jk = row['jk']
+            diagnosis = row['diagnosis']
+
+            # Customize marker color based on diagnosis
+            if diagnosis == 1:
+                color = 'red'
+            else:
+                color = 'blue'
+
+            # Create a popup with information
+            popup_text = f"<b>Umur:</b> {umur}<br><b>Jenis Kelamin:</b> {jk}<br><b>Diagnosis:</b> {diagnosis}"
+
+            # Add a marker to the cluster with the popup and color
+            folium.Marker(
+                location=[latitude, longitude],
+                popup=popup_text,
+                icon=folium.Icon(color=color)
+            ).add_to(marker_cluster)
+        except (ValueError, KeyError) as e:
+            print(f"Error processing row {index}: {e}")
+            continue  # Skip this row if there's an error
+
+    # Display the map
+    folium_static(map_bogor)
 
     # Distribusi Diagnosa Diabetes di Setiap Kelurahan
     st.subheader("Distribusi Diagnosa Diabetes di Setiap Kelurahan")
@@ -65,9 +96,12 @@ elif page == "Dashboard Visualisasi":
 
     # Heatmap Korelasi Antar Variabel Numerik
     st.subheader("Heatmap Korelasi Antar Variabel Numerik")
-    fig, ax = plt.subplots()
-    sns.heatmap(df.corr(), annot=True, cmap='coolwarm', ax=ax)
-    st.pyplot(fig)
+    numerical_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numerical_columns) > 0:
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(df[numerical_columns].corr(), annot=True, cmap='coolwarm', vmin=-1, vmax=1)
+        plt.title('Heatmap Korelasi Antar Variabel Numerik')
+        st.pyplot(plt.gcf())
 
     # Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin
     st.subheader("Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin")
