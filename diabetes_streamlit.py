@@ -167,8 +167,8 @@ elif page == "Model LSTM":
                                                     random_state=42)
     
     # Reshape data for LSTM
-    X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
-    X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+    X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
     
     # Inisilisasi Hyperparameter
     neurons = 64
@@ -301,7 +301,7 @@ elif page == "Input Data Baru":
             new_data_scaled = scaler.transform(new_data)
             
             # Reshape untuk cocok dengan input model (batch_size, timesteps, features)
-            new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], new_data_scaled.shape[1], 1))
+            new_data_scaled = new_data_scaled.reshape((new_data_scaled.shape[0], 1, new_data_scaled.shape[1]))
 
             # Prediksi menggunakan model
             model = st.session_state['model']
