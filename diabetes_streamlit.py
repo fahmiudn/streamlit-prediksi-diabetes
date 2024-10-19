@@ -185,7 +185,7 @@ elif page == "Model LSTM":
     if st.button('Latih Model'):
         # Membangun Model LSTM
         model = Sequential()
-        model.add(LSTM(neurons, activation='relu', input_shape=(X_train.shape[1], 1), return_sequences=True))
+        model.add(LSTM(neurons, activation='relu', return_sequences=True, input_shape=(1, X_train.shape[2])))
         model.add(Dropout(0.2))
         model.add(LSTM(neurons, activation='relu', return_sequences=False))
         model.add(Dropout(0.2))
