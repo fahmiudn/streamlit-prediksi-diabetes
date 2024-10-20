@@ -35,7 +35,7 @@ df = load_data()
 # st.sidebar.title("Navigasi")
 # page = st.sidebar.radio("Pilih Halaman:", ("Informasi Dataset", "Visualisasi", "Model LSTM", "Input Data Baru"))
 with st.sidebar:
-    selected = option_menu(
+    page = option_menu(
         menu_title=None,  # required
         options=["Informasi Dataset", "Dashboard Visualisasi", "Model LSTM", "Prediksi Diabetes"],  # required
         icons=["house", "map", "activity", "info-circle"],  # optional
