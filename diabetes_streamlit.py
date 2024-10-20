@@ -32,8 +32,6 @@ def load_data():
 df = load_data()
 
 # Buat sidebar untuk navigasi
-# st.sidebar.title("Navigasi")
-# page = st.sidebar.radio("Pilih Halaman:", ("Informasi Dataset", "Visualisasi", "Model LSTM", "Input Data Baru"))
 with st.sidebar:
     page = option_menu(
         menu_title=None,  # required
