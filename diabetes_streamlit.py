@@ -113,7 +113,7 @@ elif page == "Dashboard Visualisasi":
     # 2. Distribusi Diagnosa Diabetes di Setiap Kelurahan
     st.subheader("Distribusi Diagnosa Diabetes di Setiap Kelurahan")
     plt.figure(figsize=(12, 6))
-    sns.countplot(data=df, x='kelurahan', hue='diagnosis', palette=['firebrick', 'royalblue'])
+    sns.countplot(data=df, x='kelurahan', hue='diagnosis', palette=['royalblue', 'firebrick'])
     plt.xticks(rotation=90)
     plt.title('Distribusi Diagnosa Diabetes di Setiap Kelurahan')
     plt.xlabel('Kelurahan')
