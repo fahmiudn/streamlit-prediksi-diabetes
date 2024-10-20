@@ -36,7 +36,7 @@ with st.sidebar:
     page = option_menu(
         menu_title=None,  # required
         options=["Informasi Dataset", "Dashboard Visualisasi", "Model LSTM", "Prediksi Diabetes"],  # required
-        icons=["house", "map", "activity", "store"],  # optional
+        icons=["house", "map", "activity", "search"],  # optional
         menu_icon="cast",  # optional
         default_index=0,  # optional
     )
@@ -253,7 +253,7 @@ elif page == "Model LSTM":
         st.write(f"Root Mean Squared Error (RMSE): {rmse}")
 
 # Fungsi untuk menampilkan halaman prediksi
-elif page == "Input Data Baru":
+elif page == "Prediksi Diabetes":
     st.header('Input Data Baru untuk Prediksi Diabetes')
     
     # Pastikan model dan scaler sudah dilatih dan disimpan di session state
