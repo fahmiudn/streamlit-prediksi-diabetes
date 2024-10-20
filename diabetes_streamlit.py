@@ -258,18 +258,25 @@ elif page == "Prediksi Diabetes":
     
     # Pastikan model dan scaler sudah dilatih dan disimpan di session state
     if 'model' not in st.session_state or 'scaler' not in st.session_state:
-        st.warning("Model atau scaler belum dilatih. Silakan latih model terlebih dahulu di halaman 'Jalankan Model'.")
+        st.warning("Model atau scaler belum dilatih. Silakan latih model terlebih dahulu di halaman 'Model LSTM'.")
     else:
-        # Input form untuk data baru
-        umur = st.number_input("Umur:", min_value=0, max_value=120, value=0)
-        jk = st.selectbox("Jenis Kelamin", ["Laki-laki", "Perempuan"])
-        merokok = st.selectbox("Merokok", ["Ya", "Tidak"])
-        aktivitas_fisik = st.selectbox("Aktivitas Fisik", ["Ya", "Tidak"])
-        konsumsi_alkohol = st.selectbox("Konsumsi Alkohol", ["Ya", "Tidak"])
-        tekanan_darah = st.number_input("Tekanan Darah:", min_value=0, value=0)
-        bmi = st.number_input("BMI:", min_value=0.0, value=0.0)
-        lingkar_perut = st.number_input("Lingkar Perut (cm)", min_value=0, max_value=200, value=0)
-        pemeriksaan_gula = st.number_input("Hasil Pemeriksaan Gula (mg/dL)", min_value=0, max_value=400, value=0)
+        # Membuat dua kolom untuk form input
+        col1, col2 = st.columns(2)
+
+        # Input form untuk data baru di kolom 1
+        with col1:
+            umur = st.number_input("Umur:", min_value=0, max_value=120, value=0)
+            jk = st.selectbox("Jenis Kelamin", ["Laki-laki", "Perempuan"])
+            merokok = st.selectbox("Merokok", ["Ya", "Tidak"])
+            aktivitas_fisik = st.selectbox("Aktivitas Fisik", ["Ya", "Tidak"])
+            konsumsi_alkohol = st.selectbox("Konsumsi Alkohol", ["Ya", "Tidak"])
+
+        # Input form untuk data baru di kolom 2
+        with col2:
+            tekanan_darah = st.number_input("Tekanan Darah:", min_value=0, value=0)
+            bmi = st.number_input("BMI:", min_value=0.0, value=0.0)
+            lingkar_perut = st.number_input("Lingkar Perut (cm)", min_value=0, max_value=200, value=0)
+            pemeriksaan_gula = st.number_input("Hasil Pemeriksaan Gula (mg/dL)", min_value=0, max_value=400, value=0)
 
         # Konversi input ke format numerik
         jk = 0 if jk == "Laki-laki" else 1
