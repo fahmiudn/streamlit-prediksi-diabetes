@@ -123,7 +123,7 @@ elif page == "Dashboard Visualisasi":
     # 3. Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes (Pie Chart)
     st.subheader("Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes")
     plt.figure(figsize=(6, 6))
-    df['diagnosis'].value_counts().plot.pie(autopct='%1.1f%%', colors=['darkred', 'cornflowerblue'], startangle=90, explode=[0.1, 0])
+    df['diagnosis'].value_counts().plot.pie(autopct='%1.1f%%', colors=['firebrick', 'royalblue'], startangle=90, explode=[0.1, 0])
     plt.title('Perbandingan Jumlah Diagnosa Diabetes dan Non-Diabetes')
     plt.ylabel('')
     st.pyplot(plt.gcf())
@@ -140,7 +140,7 @@ elif page == "Dashboard Visualisasi":
     # 5. Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin
     st.subheader("Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin")
     plt.figure(figsize=(6, 4))
-    sns.countplot(data=df, x='jk', hue='diagnosis', palette=['darkred', 'cornflowerblue'])
+    sns.countplot(data=df, x='jk', hue='diagnosis', palette=['firebrick', 'royalblue'])
     plt.title('Jumlah Pasien Diabetes Berdasarkan Jenis Kelamin')
     plt.xlabel('Jenis Kelamin')
     plt.ylabel('Jumlah Kasus')
