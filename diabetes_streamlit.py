@@ -12,7 +12,7 @@ from streamlit_folium import folium_static
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
-from sklearn.metrics import confusion_matrix, mean_absolute_error, mean_squared_error, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, accuracy_score
 from math import sqrt
 
 import tensorflow as tf
@@ -30,8 +30,16 @@ def load_data():
 df = load_data()
 
 # Buat sidebar untuk navigasi
-st.sidebar.title("Navigasi")
-page = st.sidebar.radio("Pilih Halaman:", ("Informasi Dataset", "Visualisasi", "Model LSTM", "Input Data Baru"))
+# st.sidebar.title("Navigasi")
+# page = st.sidebar.radio("Pilih Halaman:", ("Informasi Dataset", "Visualisasi", "Model LSTM", "Input Data Baru"))
+with st.sidebar:
+    selected = option_menu(
+        menu_title=None,  # required
+        options=["Informasi Dataset", "Dashboard Visualisasi", "Model LSTM", "Prediksi Diabetes"],  # required
+        icons=["house", "map", "activity", "info-circle"],  # optional
+        menu_icon="cast",  # optional
+        default_index=0,  # optional
+    )
 
 # Fungsi untuk menampilkan halaman awal
 if page == "Informasi Dataset":
@@ -243,18 +251,6 @@ elif page == "Model LSTM":
         # Print hasil evaluasi
         st.write(f"Mean Absolute Error (MAE): {mae}")
         st.write(f"Root Mean Squared Error (RMSE): {rmse}")
-        
-        # Menghitung metrik klasifikasi
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
-
-        # Menampilkan hasil
-        st.write(f"Accuracy: {accuracy}")
-        st.write(f"Precision: {precision}")
-        st.write(f"Recall: {recall}")
-        st.write(f"F1 Score: {f1}")
 
 # Fungsi untuk menampilkan halaman prediksi
 elif page == "Input Data Baru":
