@@ -36,7 +36,7 @@ with st.sidebar:
     page = option_menu(
         menu_title=None,  # required
         options=["Informasi Dataset", "Dashboard Visualisasi", "Model LSTM", "Prediksi Diabetes"],  # required
-        icons=["house", "map", "activity", "info-circle"],  # optional
+        icons=["house", "map", "activity", "store"],  # optional
         menu_icon="cast",  # optional
         default_index=0,  # optional
     )
@@ -64,7 +64,7 @@ if page == "Informasi Dataset":
     st.write("F1 Score: **97.07%**")
 
 # Fungsi untuk menampilkan halaman dashboard visualisasi
-elif page == "Visualisasi":
+elif page == "Dashboard Visualisasi":
     st.header("Dashboard Visualisasi")
 
     # Load dataset
