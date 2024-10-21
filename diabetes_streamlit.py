@@ -36,7 +36,7 @@ with st.sidebar:
     page = option_menu(
         menu_title=None,  # required
         options=["Informasi Dataset", "Dashboard Visualisasi", "Model LSTM", "Prediksi Diabetes"],  # required
-        icons=["table", "map", "robot", "users"],  # optional
+        icons=["table", "map", "robot", "user"],  # optional
         menu_icon="cast",  # optional
         default_index=0,  # optional
     )
