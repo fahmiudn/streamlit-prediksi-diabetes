@@ -86,6 +86,10 @@ elif page == "Dashboard Visualisasi":
             jk = row['jk']
             diagnosis = row['diagnosis']
 
+            # Ganti nilai jk menjadi "Laki-laki" atau "Perempuan"
+            jk = "Laki-laki" if row['jk'] == 0 else "Perempuan"
+            diagnosis = row['diagnosis']
+
             # Customize marker color based on diagnosis
             if diagnosis == 1:
                 color = 'red'
