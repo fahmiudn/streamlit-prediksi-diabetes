@@ -313,5 +313,5 @@ elif page == "Prediksi Diabetes":
             new_prediction_class = (new_prediction_prob > 0.5).astype("int32")
 
             # Tampilkan hasil prediksi
-            st.write(f"Probabilitas Diabetes: {new_prediction_prob[0][0]}")
+            st.write(f"Probabilitas Diabetes: {new_prediction_prob[0][0]} * 100:.2f}%")
             st.write(f"Prediksi Kelas: {'Diabetes' if new_prediction_class[0][0] == 1 else 'Non-Diabetes'}")
