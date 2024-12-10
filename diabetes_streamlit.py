@@ -237,7 +237,7 @@ elif page == "Model LSTM":
         
         # Evaluate the model
         test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
-        st.write(f"Test Accuracy: {test_accuracy * 100:.2f}%")
+        st.write(f"Test Accuracy: {test_accuracy}")
         
         # Setelah model dilatih, kita lakukan prediksi pada test set
         y_pred_prob = model.predict(X_test)
@@ -246,12 +246,12 @@ elif page == "Model LSTM":
         y_pred = (y_pred_prob > 0.5).astype("int32")
 
         # Hitung MAE, RMSE, dan MAPE berdasarkan probabilitas prediksi
-        mae = mean_absolute_error(y_test, y_pred_prob) * 100
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob)) * 100
+        mae = mean_absolute_error(y_test, y_pred_prob)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred_prob))
 
         # Print hasil evaluasi
-        st.write(f"Mean Absolute Error (MAE): {mae:.2f}%")
-        st.write(f"Root Mean Squared Error (RMSE): {rmse:.2f}%")
+        st.write(f"Mean Absolute Error (MAE): {mae}")
+        st.write(f"Root Mean Squared Error (RMSE): {rmse}")
 
 # Fungsi untuk menampilkan halaman prediksi
 elif page == "Prediksi Diabetes":
