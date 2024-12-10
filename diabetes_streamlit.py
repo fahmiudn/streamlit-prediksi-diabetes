@@ -266,7 +266,7 @@ elif page == "Prediksi Diabetes":
 
         # Input form untuk data baru di kolom 1
         with col1:
-            umur = st.number_input("Umur:", min_value=0, max_value=120, value=0)
+            umur = st.slider("Umur:", min_value=10, max_value=70, value=0, step=1)
             jk = st.selectbox("Jenis Kelamin", ["Laki-laki", "Perempuan"])
             merokok = st.selectbox("Merokok", ["Ya", "Tidak"])
             aktivitas_fisik = st.selectbox("Aktivitas Fisik", ["Ya", "Tidak"])
@@ -274,10 +274,10 @@ elif page == "Prediksi Diabetes":
 
         # Input form untuk data baru di kolom 2
         with col2:
-            tekanan_darah = st.number_input("Tekanan Darah:", min_value=0, value=0)
-            bmi = st.number_input("BMI:", min_value=0.0, value=0.0)
-            lingkar_perut = st.number_input("Lingkar Perut (cm)", min_value=0, max_value=200, value=0)
-            pemeriksaan_gula = st.number_input("Hasil Pemeriksaan Gula (mg/dL)", min_value=0, max_value=400, value=0)
+            tekanan_darah = st.slider("Tekanan Darah (mmHg):", min_value=80, max_value=200, value=0, step=1)
+            bmi = st.slider("BMI:", min_value=10.0, max_value=50.0, value=0, step=0.1)
+            lingkar_perut = st.slider("Lingkar Perut (cm):", min_value=50, max_value=150, value=0, step=1)
+            pemeriksaan_gula = st.slider("Hasil Pemeriksaan Gula (mg/dL):", min_value=70, max_value=300, value=0, step=1)
 
         # Konversi input ke format numerik
         jk = 0 if jk == "Laki-laki" else 1
