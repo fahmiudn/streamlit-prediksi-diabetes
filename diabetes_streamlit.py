@@ -189,15 +189,25 @@ elif page == "Model LSTM":
     st.write(f"Jumlah Epoch: {epochs}")
     st.write(f"Batch Size: {batch_size}")
     st.write(f"Learning Rate: {learning_rate}")
-    
+
     # Tambahkan tombol untuk melatih model
     if st.button('Latih Model'):
         # Membangun Model LSTM
         model = Sequential()
+
+        # Lapisan LSTM pertama dengan fungsi aktivasi ReLU
+        # ReLU membantu mengatasi masalah vanishing gradient dengan menyaring nilai negatif menjadi nol
+        # dan memungkinkan propagasi gradien yang efisien selama pelatihan.
         model.add(LSTM(neurons, activation='relu', return_sequences=True, input_shape=(1, X_train.shape[2])))
-        model.add(Dropout(0.2))
+        model.add(Dropout(0.2))# Dropout untuk mencegah overfitting
+
+        # Lapisan LSTM kedua dengan fungsi aktivasi ReLU
         model.add(LSTM(neurons, activation='relu', return_sequences=False))
         model.add(Dropout(0.2))
+
+        # Lapisan output dengan fungsi aktivasi sigmoid
+        # Sigmoid memetakan nilai menjadi rentang 0 hingga 1, yang cocok untuk prediksi probabilitas
+        # pada tugas klasifikasi biner seperti deteksi diabetes.
         model.add(Dense(1, activation='sigmoid'))
         
         # Compile Model dengan Optimizer
@@ -252,6 +262,38 @@ elif page == "Model LSTM":
         # Print hasil evaluasi
         st.write(f"Mean Absolute Error (MAE): {mae}")
         st.write(f"Root Mean Squared Error (RMSE): {rmse}")
+
+    # Penjelasan Hyperparameter dan Pengaruhnya
+    st.subheader("Penjelasan Hyperparameter dan Pengaruhnya")
+    
+    st.write("""
+    - **Dropout Rate:** Nilai dropout sebesar 0.2 berarti 20% neuron secara acak akan dinonaktifkan selama pelatihan di setiap batch. 
+      Ini membantu mencegah overfitting dengan mengurangi ketergantungan pada neuron tertentu dan mendorong jaringan untuk belajar pola yang lebih umum.
+      
+    - **Optimizer (Adam):** Optimizer Adam adalah metode yang menggabungkan keunggulan dari optimasi momentum dan RMSProp. 
+      Adam secara adaptif menyesuaikan learning rate untuk setiap parameter, membuatnya efisien untuk berbagai masalah dan dataset. 
+      Penggunaannya membantu pelatihan menjadi lebih cepat dan stabil.
+    
+    - **Fungsi Aktivasi (ReLU dan Sigmoid):**
+      - **ReLU (Rectified Linear Unit):** Mengatur output menjadi nol untuk semua nilai input negatif, dan outputnya sama dengan input untuk nilai positif. 
+        Hal ini membantu mengurangi masalah vanishing gradient dan memungkinkan model mempelajari pola yang lebih kompleks.
+      - **Sigmoid:** Digunakan pada lapisan output untuk tugas klasifikasi biner. Fungsi sigmoid menghasilkan output dalam rentang [0, 1], 
+        yang diinterpretasikan sebagai probabilitas. Ini cocok untuk menentukan apakah seseorang memiliki diabetes atau tidak berdasarkan probabilitas.
+    
+    - **SMOTE (Synthetic Minority Over-sampling Technique):** Teknik ini digunakan untuk menangani ketidakseimbangan data dengan membuat sampel sintetis untuk kelas minoritas. 
+      Dengan SMOTE, model dapat belajar pola dari kedua kelas dengan lebih baik, meningkatkan akurasi prediksi pada kelas minoritas.
+    
+    ### Pengaruh Kombinasi Hyperparameter
+    - **Interaksi Neuron dan Dropout:** Jumlah neuron yang besar dikombinasikan dengan dropout yang tepat (misalnya, 0.2) membantu model menangkap pola kompleks tanpa terlalu bergantung pada fitur tertentu.
+    - **Epoch dan Batch Size:** Kombinasi jumlah epoch dan ukuran batch menentukan stabilitas dan kecepatan pelatihan. 
+      Batch besar cenderung stabil tetapi lambat, sementara batch kecil cepat tetapi bisa fluktuatif. Menentukan jumlah epoch yang optimal sangat penting agar model tidak overfit atau underfit.
+    - **Learning Rate dan Optimizer:** Learning rate yang terlalu besar dapat menyebabkan model melompat-lompat melewati solusi optimal, 
+      sedangkan nilai yang terlalu kecil memperlambat proses konvergensi. Optimizer Adam membantu menyesuaikan learning rate secara dinamis sehingga proses pelatihan lebih efisien.
+    
+    ### Kesimpulan
+    Hyperparameter harus dipilih dengan hati-hati berdasarkan eksperimen dan pemahaman mendalam tentang dataset. 
+    Kombinasi yang tepat antara jumlah neuron, dropout, learning rate, dan epoch dapat menghasilkan model yang tidak hanya akurat tetapi juga generalisasi dengan baik pada data yang belum pernah dilihat sebelumnya.
+    """)
 
 # Fungsi untuk menampilkan halaman prediksi
 elif page == "Prediksi Diabetes":
