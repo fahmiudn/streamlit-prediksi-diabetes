@@ -263,14 +263,26 @@ elif page == "Model LSTM":
         st.write(f"Mean Absolute Error (MAE): {mae}")
         st.write(f"Root Mean Squared Error (RMSE): {rmse}")
 
-        # Penjelasan Hyperparameter dan Pengaruhnya
-        st.subheader("Penjelasan Hyperparameter dan Pengaruhnya")
+        # Penjelasan Fungsi Aktivasi
+        st.subheader("Penjelasan Fungsi Aktivasi")
+        
         st.write("""
-        - **Fungsi Aktivasi (ReLU dan Sigmoid):**
-          - **ReLU (Rectified Linear Unit):** Mengatur output menjadi nol untuk semua nilai input negatif, dan outputnya sama dengan input untuk nilai positif. 
-            Hal ini membantu mengurangi masalah vanishing gradient dan memungkinkan model mempelajari pola yang lebih kompleks.
-          - **Sigmoid:** Digunakan pada lapisan output untuk tugas klasifikasi biner. Fungsi sigmoid menghasilkan output dalam rentang [0, 1], 
-            yang diinterpretasikan sebagai probabilitas. Ini cocok untuk menentukan apakah seseorang memiliki diabetes atau tidak berdasarkan probabilitas.
+        Fungsi aktivasi digunakan untuk memperkenalkan non-linearitas ke dalam model, memungkinkan jaringan neural mempelajari pola yang kompleks. 
+        Pada model LSTM ini, digunakan dua fungsi aktivasi utama, yaitu ReLU dan Sigmoid:
+        
+        - **ReLU (Rectified Linear Unit):**
+          - Fungsi ini mengubah output menjadi 0 untuk semua nilai input negatif, dan outputnya sama dengan input untuk nilai positif.
+          - Keuntungan utama ReLU adalah mengurangi masalah vanishing gradient, sehingga model dapat belajar pola yang lebih kompleks dengan lebih efisien.
+          - Fungsi ini cocok digunakan di lapisan tersembunyi (hidden layers), terutama untuk model yang mendalam seperti LSTM.
+        
+        - **Sigmoid:**
+          - Fungsi ini menghasilkan output dalam rentang [0, 1], sehingga dapat diinterpretasikan sebagai probabilitas.
+          - Pada model ini, sigmoid digunakan di lapisan output untuk tugas klasifikasi biner (diabetes atau non-diabetes).
+          - Keunggulan fungsi sigmoid adalah kemampuannya untuk memetakan nilai output ke skala yang sesuai untuk probabilitas, tetapi rentan terhadap masalah vanishing gradient pada lapisan yang lebih dalam.
+        
+        Penggunaan kombinasi ReLU dan Sigmoid membantu model LSTM dalam:
+        1. Menangkap pola yang kompleks melalui lapisan tersembunyi dengan ReLU.
+        2. Memberikan hasil akhir yang dapat diinterpretasikan sebagai probabilitas dengan Sigmoid pada lapisan output.
         """)
 
 # Fungsi untuk menampilkan halaman prediksi
