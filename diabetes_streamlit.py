@@ -267,17 +267,13 @@ elif page == "Model LSTM":
         st.subheader("Penjelasan Fungsi Aktivasi")
         
         st.write("""
-        Fungsi aktivasi digunakan untuk memperkenalkan non-linearitas ke dalam model, memungkinkan jaringan neural mempelajari pola yang kompleks. 
+        Fungsi aktivasi digunakan untuk memperkenalkan non-linearitas ke dalam model, memungkinkan mempelajari pola yang kompleks. 
         Pada model LSTM ini, digunakan dua fungsi aktivasi utama, yaitu ReLU dan Sigmoid:
         
         - **ReLU (Rectified Linear Unit):**
-          - Fungsi ini mengubah output menjadi 0 untuk semua nilai input negatif, dan outputnya sama dengan input untuk nilai positif.
-          - Keuntungan utama ReLU adalah mengurangi masalah vanishing gradient, sehingga model dapat belajar pola yang lebih kompleks dengan lebih efisien.
-          - Fungsi ini cocok digunakan di lapisan tersembunyi (hidden layers), terutama untuk model yang mendalam seperti LSTM.
-        
+          - Keunggulan utama ReLU adalah mengurangi masalah vanishing gradient, sehingga model dapat belajar pola yang lebih kompleks dengan lebih efisien.
+          
         - **Sigmoid:**
-          - Fungsi ini menghasilkan output dalam rentang [0, 1], sehingga dapat diinterpretasikan sebagai probabilitas.
-          - Pada model ini, sigmoid digunakan di lapisan output untuk tugas prediksi biner (diabetes atau non-diabetes).
           - Keunggulan fungsi sigmoid adalah kemampuannya untuk memetakan nilai output ke skala yang sesuai untuk probabilitas, tetapi rentan terhadap masalah vanishing gradient pada lapisan yang lebih dalam.
         
         Penggunaan kombinasi ReLU dan Sigmoid membantu model LSTM dalam:
